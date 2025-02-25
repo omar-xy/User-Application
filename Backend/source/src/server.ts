@@ -1,4 +1,5 @@
 import express from "express"
+import cors from "cors";
 
 import { initGetUsers } from "./routes/test";
 import { initOpenApi, openApiInstance } from "./openapi";
@@ -8,9 +9,16 @@ import userRoutes from './routes/useRouter';
 
 
 const app = express();
+
+
 const port = process.env.PORT || 8000;
 
 app.use(express.json());
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: "GET,POST,PUT,DELETE",
+  credentials: true, // Allow cookies and credentials
+}));
 
 // api 
 app.use('/api', userRoutes);
