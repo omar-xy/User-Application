@@ -55,14 +55,17 @@ DATABASE_URL=postgresql://******:******@localhost:5432/******
 ---
 
 ## Install Makefile
+
 If `make` is not installed on your Linux/Unix system, install it using your package manager:
 
 ### Debian/Ubuntu:
+
 ```bash
 sudo apt install make
 ```
 
 ### macOS (using Homebrew):
+
 ```bash
 brew install make
 ```
@@ -72,23 +75,31 @@ brew install make
 ## Running the Application
 
 ### Backend
+
 Start the PostgreSQL database:
+
 ```bash
 make up
 ```
+
 Run the backend setup (install dependencies, generate Prisma client, run migrations, and seed the database):
+
 ```bash
 make setup-backend
 ```
+
 The backend will automatically start after the setup is complete.
 
-The backend will run on [http://localhost:8000](http://localhost:8000).
+The backend will run on [http://localhost:3001](http://localhost:3001).
 
 ### Frontend
+
 Run the frontend setup (install dependencies and build the frontend):
+
 ```bash
 make setup-frontend
 ```
+
 The frontend will automatically start after the setup is complete.
 
 The frontend will run on [http://localhost:3000](http://localhost:3000).
@@ -98,16 +109,19 @@ The frontend will run on [http://localhost:3000](http://localhost:3000).
 ## Pagination and Response Handling
 
 ### Requesting Users
+
 The backend supports pagination for fetching users. You can request users with the following query parameter:
 
 - **page**: The page number (default: 1).
 
 #### Example Request:
+
 ```http
 GET /users?page=1
 ```
 
 #### Expected Response Payload:
+
 ```json
 {
   "users": [
@@ -125,17 +139,37 @@ GET /users?page=1
 }
 ```
 
-### How We Handled the Response:
+### How We Handled the Response
 
 #### Backend:
+
 - Uses Prisma to query the database with pagination.
 - `skip` and `take` parameters are used for pagination.
 - `skip` value is calculated as `(page - 1) * take`, where `take` is the number of users per page (default: 10).
 - `orderBy` parameter ensures users are returned in alphabetical order by name.
 
+#### How It Works:
+
+1. **Calculate skip and take:**
+   - `page`: The page number requested by the client (default: 1).
+   - `take`: The number of users to return per page (fixed at 10).
+   - `skip`: The number of users to skip, calculated as `(page - 1) * take`.
+
+   **For example:**
+   - If `page = 1`, then `skip = 0` and `take = 10`. This returns the first 10 users.
+   - If `page = 2`, then `skip = 10` and `take = 10`. This returns the next 10 users.
+
+2. **Query the Database:**
+   - The `findMany` method is used to fetch users from the database.
+   - The `skip` parameter ensures that the query skips the first `skip` users.
+   - The `take` parameter limits the result to the next `take` users.
+   - The `orderBy` parameter ensures that users are returned in alphabetical order by name.
+
 #### Frontend:
-- Uses infinite scrolling to load more users dynamically with fetch().
+
+- Uses infinite scrolling to load more users dynamically.
 - The `page` state is incremented to fetch the next set of users.
+
 
 
 #### Happy Scrolling 🥂☑️
