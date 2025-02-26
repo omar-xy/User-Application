@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.ts",
+    "prisma": "prisma generate",
+    "migrate": "prisma migrate dev --name init",
+    "seed": "ts-node scripts/seed.ts"
   },
   "author": "",
   "license": "ISC",
