@@ -38,15 +38,18 @@ Before running the application, ensure you have the following installed:
    cp .env.template .env
 2. Update the   `.env` file with your PostgreSQL credentials
 
+3. Copy the same `.env` in the root of `Backend/source` dir.
+
+
 ### .env
 ```ini
 # PostgreSQL credentials
-POSTGRES_USER=user
-POSTGRES_PASSWORD=password
-POSTGRES_DB=mydb
+POSTGRES_USER=******
+POSTGRES_PASSWORD=******
+POSTGRES_DB=******
 
 # Prisma database URL
-DATABASE_URL=postgresql://user:password@localhost:5432/mydb
+DATABASE_URL=postgresql://******:******@localhost:5432/******
 ```
 
 ---
@@ -79,7 +82,7 @@ make setup-backend
 ```
 The backend will automatically start after the setup is complete.
 
-The backend will run on [http://localhost:3001](http://localhost:3001).
+The backend will run on [http://localhost:8000](http://localhost:8000).
 
 ### Frontend
 Run the frontend setup (install dependencies and build the frontend):
@@ -123,6 +126,7 @@ GET /users?page=1
 ```
 
 ### How We Handled the Response:
+
 #### Backend:
 - Uses Prisma to query the database with pagination.
 - `skip` and `take` parameters are used for pagination.
@@ -130,6 +134,8 @@ GET /users?page=1
 - `orderBy` parameter ensures users are returned in alphabetical order by name.
 
 #### Frontend:
-- Uses infinite scrolling to load more users dynamically.
+- Uses infinite scrolling to load more users dynamically with fetch().
 - The `page` state is incremented to fetch the next set of users.
 
+
+#### Happy Scrolling 🥂☑️
