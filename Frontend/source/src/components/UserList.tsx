@@ -52,14 +52,14 @@ export default function UserList() {
     overscan: 5,
   });
   
-  // Load more when scrolling to bottom
+  // loading more when scrolling to bottom
   const loadMoreUsers = () => {
     if (!loading && hasMore) {
       loadUsers(currentPage + 1);
     }
   };
   
-  // Check if we need to load more 
+  // checking if we need to load more 
   useEffect(() => {
     const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
     
@@ -73,109 +73,114 @@ export default function UserList() {
   }, [rowVirtualizer.getVirtualItems(), loading, hasMore]);
   
   return (
-    <div className="flex flex-col h-screen max-h-screen">
-      <header className="p-4 bg-blue-600 text-white">
-        <h1 className="text-2xl font-bold">User Directory</h1>
+    <div className="flex h-screen max-h-screen bg-background text-glow">
+      {/* sidebar header */}
+      <header className="w-20 bg-neonPurple/90 flex flex-col items-center py-6 fixed h-full shadow-lg shadow-neonPurple/50">
+        <h1 className="text-2xl font-extrabold text-glow transform -rotate-90 whitespace-nowrap mt-auto mb-20">
+          Neon Users
+        </h1>
       </header>
   
-      {error && (
-        <div className="p-4 text-red-600 bg-red-100 text-center">
-          {error}
-        </div>
-      )}
+      <div className="flex-1 ml-20 overflow-hidden">
+        {error && (
+          <div className="p-3 bg-neonPink/20 text-neonPink text-center font-medium border-b-2 border-neonPink">
+            {error}
+          </div>
+        )}
   
-      {/* this div for virtualized list */}
-      <div
-        ref={parentRef}
-        className="flex-1 overflow-auto"
-        style={{
-          height: `calc(100vh - 80px)`,
-          width: '100%',
-        }}
-      >
+        {/* virtualized list of users*/}
         <div
+          ref={parentRef}
+          className="h-full overflow-auto p-8"
           style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            width: '100%',
-            position: 'relative',
+            height: `calc(100vh - ${error ? "60px" : "0px"})`,
+            width: "100%",
           }}
         >
-          <div className="flex flex-col gap-100">
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const isLoaderRow = virtualRow.index >= users.length;
-              const user = users[virtualRow.index];
+          <div
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            <div className="flex flex-col gap-8"> {/* Larger gap (32px) */}
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const isLoaderRow = virtualRow.index >= users.length;
+                const user = users[virtualRow.index];
   
-              return (
-                <div
-                  key={virtualRow.index}
-                  className={`absolute top-0 left-0 w-full ${
-                    virtualRow.index % 2 ? "bg-gray-50" : "bg-white"
-                  }`}
-                  style={{
-                    height: `${virtualRow.size}px`,
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
-                  {isLoaderRow ? (
-                    loading ? (
-                      <div className="p-2 text-center">Loading more users...</div>
-                    ) : null
-                  ) : (
-                    <div className="border-b gap-2 p-2 flex items-center">
-                      {/* avatar */}
-                      <div className="w-9 h-9 bg-blue-300 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-white font-semibold">
-                          {user.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
+                return (
+                  <div
+                    key={virtualRow.index}
+                    className="absolute top-0 left-0 w-full bg-background/80 border-2 border-neonCyan rounded-lg shadow-[0_0_15px_rgba(0,255,255,0.5)] hover:shadow-[0_0_25px_rgba(0,255,255,0.8)] transition-all"
+                    style={{
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    {isLoaderRow ? (
+                      loading ? (
+                        <div className="p-6 text-center text-neonCyan/70 font-medium">
+                          Fetching more neon souls...
+                        </div>
+                      ) : null
+                    ) : (
+                      <div className="p-6 flex items-center gap-6">
+                        {/* Avatar */}
+                        <div className="w-14 h-14 bg-neonPink rounded-full flex items-center justify-center border-4 border-neonPink shadow-[0_0_10px_rgba(255,0,127,0.7)]">
+                          <span className="text-glow text-2xl font-bold">
+                            {user.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
   
-                      {/* name wrapper */}
-                      <div className="bg-gray-100 rounded-lg p-2 flex-1">
-                        <span className="text-lg font-semibold item-center text-black">
-                          {user.name}
-                        </span>
+                        {/* Name */}
+                        <div className="flex-1">
+                          <span className="text-2xl font-bold text-glow">
+                            {user.name}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
   
-      {/* footer */}
-      <footer className="p-4 bg-gray-100 text-center text-sm text-gray-600 border-t border-gray-200">
-        {loading ? (
-          <div className="flex items-center justify-center gap-2">
-            <svg
-              className="animate-spin h-4 w-4 text-blue-600"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            <span>Loading more users...</span>
-          </div>
-        ) : hasMore ? (
-          <span>Scroll down to load more users</span>
-        ) : (
-          <span>All users loaded</span>
-        )}
-      </footer>
+        {/* floating Bar */}
+        <footer className="absolute bottom-4 left-24 right-4 bg-neonPurple/80 text-glow text-center py-3 rounded-full shadow-[0_0_20px_rgba(157,0,255,0.6)] backdrop-blur-sm">
+          {loading ? (
+            <div className="flex items-center justify-center gap-3">
+              <svg
+                className="animate-spin h-5 w-5 text-neonCyan"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <span>Fetching more neon souls...</span>
+            </div>
+          ) : hasMore ? (
+            <span>Scroll for more glow!</span>
+          ) : (
+            <span>All neon souls aboard!</span>
+          )}
+        </footer>
+      </div>
     </div>
   );
 }

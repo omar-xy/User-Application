@@ -29,7 +29,6 @@ router.get('/users', async (req, res) => {
       }
     });
     
-    // make sure from the format later
     res.json({ users });
 
   } catch (error) {
