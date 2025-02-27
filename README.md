@@ -143,7 +143,7 @@ make up
 Run the backend setup (install dependencies, generate Prisma client, run migrations, and seed the database):
 
 ```bash
-make setup-backend
+make setup_backend
 ```
 
 The backend will automatically start after the setup is complete.
@@ -155,7 +155,7 @@ The backend will run on [http://localhost:3001](http://localhost:3001).
 Run the frontend setup (install dependencies and build the frontend):
 
 ```bash
-make setup-frontend
+make setup_frontend
 ```
 
 The frontend will automatically start after the setup is complete.
