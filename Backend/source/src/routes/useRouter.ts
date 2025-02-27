@@ -1,4 +1,4 @@
-import { response, Router } from 'express';
+import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -8,7 +8,6 @@ const router = Router();
 // /api/users GET
 router.get('/users', async (req, res) => {
   try {
-    // get page from query params
     const page = parseInt(req.query.page as string) || 1;
 
     // here need to define how many items per page & how many items to skip
@@ -33,6 +32,43 @@ router.get('/users', async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching users:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+router.get('/users/by-letter', async (req, res) => {
+  try {
+    const letter = (req.query.letter as string)?.toUpperCase(); // case insensitive
+    const page = parseInt(req.query.page as string) || 1;
+
+    if (!letter || !/^[A-Z]$/.test(letter)) {
+      return res.status(400).json({ error: "Invalid letter parameter" });
+    }
+
+    const take = 10;
+    const skip = (page - 1) * take;
+
+    const users = await prisma.user.findMany({
+      where: {
+        name: {
+          startsWith: letter, // filtering by first letter
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+      },
+      take,
+      skip,
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    res.json({ users });
+  } catch (error) {
+    console.error("Error fetching users by letter:", error);
     res.status(500).send("Internal Server Error");
   }
 });

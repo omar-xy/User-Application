@@ -25,10 +25,23 @@ export interface User {
         return { users: data };
       }
       
-      // If the API already returns in the expected format
       return data;
     } catch (error) {
       console.error('Error fetching users:', error);
+      throw error;
+    }
+  }
+
+  export async function fetchUsersByLetter(letter: string, page: number = 1): Promise<UsersResponse> {
+    try {
+      const response = await fetch(`${API_URL}/api/users/by-letter?letter=${letter}&page=${page}`);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? { users: data } : data;
+    } catch (error) {
+      console.error(`Error fetching users by letter ${letter}:`, error);
       throw error;
     }
   }

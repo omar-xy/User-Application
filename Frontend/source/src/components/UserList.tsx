@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { User, fetchUsers } from '@/services/userService';
+import { User, fetchUsers, fetchUsersByLetter } from '@/services/userService';
 
 export default function UserList() {
   const [users, setUsers] = useState<User[]>([]);
@@ -10,22 +10,26 @@ export default function UserList() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
+
   const parentRef = useRef<HTMLDivElement>(null);
-  
+
+  // changed initial load to use loadusers with selectedletter
   useEffect(() => {
     loadUsers(1);
-  }, []);
-  
+  }, [selectedLetter]);
+
+  // updated loadusers handle letter filterin
   const loadUsers = async (page: number) => {
     if (loading || (!hasMore && page !== 1)) return;
-    
+  
     setLoading(true);
     setError(null);
-    
+  
     try {
-      const data = await fetchUsers(page);
-      
+      const data = selectedLetter
+        ? await fetchUsersByLetter(selectedLetter, page)
+        : await fetchUsers(page); // separate calls with explicit args
       if (data.users.length === 0) {
         setHasMore(false);
       } else {
@@ -43,52 +47,72 @@ export default function UserList() {
       setLoading(false);
     }
   };
-  
-  // this is a virtualizer for good list rendering
+
   const rowVirtualizer = useVirtualizer({
     count: hasMore ? users.length + 1 : users.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 35,
+    estimateSize: () => 100, // increased to match card height
     overscan: 5,
   });
-  
-  // loading more when scrolling to bottom
+
   const loadMoreUsers = () => {
     if (!loading && hasMore) {
       loadUsers(currentPage + 1);
     }
   };
-  
-  // checking if we need to load more 
+
   useEffect(() => {
     const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
-    
-    if (
-      lastItem?.index >= users.length - 5 &&
-      hasMore &&
-      !loading
-    ) {
+    if (lastItem?.index >= users.length - 5 && hasMore && !loading) {
       loadMoreUsers();
     }
   }, [rowVirtualizer.getVirtualItems(), loading, hasMore]);
-  
+
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
   return (
     <div className="flex h-screen max-h-screen bg-background text-glow">
-      {/* sidebar header */}
-      <header className="w-20 bg-neonPurple/90 flex flex-col items-center py-6 fixed h-full shadow-lg shadow-neonPurple/50">
-        <h1 className="text-2xl font-extrabold text-glow transform -rotate-90 whitespace-nowrap mt-auto mb-20">
-          Neon Users
-        </h1>
+      {/* Sidebar Header with alphabet Menu */}
+      <header className="w-20 bg-neonPurple/90 flex flex-col items-center fixed h-full shadow-lg shadow-neonPurple/50">
+        <h1 className="text-2xl font-extrabold text-glow py-6">Neon Users</h1>
+
+        {/* scrollable alphabet*/}
+        <div className="flex-1 overflow-y-auto py-2">
+          <div className="flex flex-col gap-1"> {/* Smaller gap */}
+            {alphabet.map((letter) => (
+              <button
+                key={letter}
+                onClick={() => setSelectedLetter(letter)}
+                className={`w-8 h-8 rounded-full text-glow text-sm font-bold ${
+                  selectedLetter === letter
+                    ? "bg-neonCyan text-background shadow-[0_0_8px_rgba(0,255,255,0.7)]"
+                    : "bg-neonPurple/50 hover:bg-neonCyan/50"
+                } transition-all`}
+              >
+                {letter}
+              </button>
+            ))}
+            <button
+              onClick={() => setSelectedLetter(null)}
+              className={`w-8 h-8 rounded-full text-glow text-sm font-bold ${
+                selectedLetter === null
+                  ? "bg-neonCyan text-background shadow-[0_0_8px_rgba(0,255,255,0.7)]"
+                  : "bg-neonPurple/50 hover:bg-neonCyan/50"
+              } transition-all`}
+            >
+              All
+            </button>
+          </div>
+        </div>
       </header>
-  
+
       <div className="flex-1 ml-20 overflow-hidden">
         {error && (
           <div className="p-3 bg-neonPink/20 text-neonPink text-center font-medium border-b-2 border-neonPink">
             {error}
           </div>
         )}
-  
-        {/* virtualized list of users*/}
+
         <div
           ref={parentRef}
           className="h-full overflow-auto p-8"
@@ -104,11 +128,11 @@ export default function UserList() {
               position: "relative",
             }}
           >
-            <div className="flex flex-col gap-8"> {/* Larger gap (32px) */}
+            <div className="flex flex-col gap-8">
               {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                 const isLoaderRow = virtualRow.index >= users.length;
                 const user = users[virtualRow.index];
-  
+
                 return (
                   <div
                     key={virtualRow.index}
@@ -126,14 +150,11 @@ export default function UserList() {
                       ) : null
                     ) : (
                       <div className="p-6 flex items-center gap-6">
-                        {/* Avatar */}
                         <div className="w-14 h-14 bg-neonPink rounded-full flex items-center justify-center border-4 border-neonPink shadow-[0_0_10px_rgba(255,0,127,0.7)]">
                           <span className="text-glow text-2xl font-bold">
                             {user.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
-  
-                        {/* Name */}
                         <div className="flex-1">
                           <span className="text-2xl font-bold text-glow">
                             {user.name}
@@ -147,8 +168,7 @@ export default function UserList() {
             </div>
           </div>
         </div>
-  
-        {/* floating Bar */}
+
         <footer className="absolute bottom-4 left-24 right-4 bg-neonPurple/80 text-glow text-center py-3 rounded-full shadow-[0_0_20px_rgba(157,0,255,0.6)] backdrop-blur-sm">
           {loading ? (
             <div className="flex items-center justify-center gap-3">
