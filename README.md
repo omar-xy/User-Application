@@ -88,7 +88,7 @@ Before running the application, ensure you have the following installed:
 
 ## Setup
 
-### Environment Variables
+### **Clone the Repository & Set Up Environment Variables **
 
 1. Create a `.env` file in the root of the project using the provided template:
 
