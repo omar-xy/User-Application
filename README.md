@@ -223,7 +223,7 @@ GET /users?page=1
    - The `take` parameter limits the result to the next `take` users.
    - The `orderBy` parameter ensures that users are returned in alphabetical order by name.
 
-#### Frontend:
+#### A futuristic, cyberpunk Frontend:
 
 - Uses infinite scrolling to load more users dynamically.
 - The `page` state is incremented to fetch the next set of users.
